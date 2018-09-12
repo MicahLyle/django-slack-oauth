@@ -52,6 +52,9 @@ class SlackAuthView(RedirectView):
 
     text_error = 'Attempt to update has failed. Please try again.'
 
+    # This gets set by as_view
+    auth_type = None
+
     @property
     def cache_key(self):
         return 'slack:' + str(self.request.user)
