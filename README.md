@@ -10,6 +10,9 @@ A lightweight module for integrating your Django application with Slack.
 
 To use Slack OAuth in your Django app, you'll need your `SLACK_CLIENT_ID` and `SLACK_CLIENT_SECRET` which can be found when you [Create a New Slack Application](https://api.slack.com/applications).
 
+Note: This README is currently out of date if it is in my (Micah Lyle's) repository. I changed
+a few things around to better work with an application I am working on at the moment (09/11/2018).
+
 
 ## Instructions
 
