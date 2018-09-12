@@ -147,7 +147,7 @@ class SlackAuthView(RedirectView):
         messages.add_message(self.request, messages.ERROR, '%s' % msg)
         if self.auth_type == "add":
             redirect = settings.SLACK_ADD_ERROR_REDIRECT_URL
-        elif self.auth_type == "signin"
+        elif self.auth_type == "signin":
             redirect = settings.SLACK_SIGNIN_ERROR_REDIRECT_URL
         return self.response(redirect=redirect)
 
@@ -155,6 +155,6 @@ class SlackAuthView(RedirectView):
         if redirect is None:
             if self.auth_type == "add":
                 redirect = settings.SLACK_ADD_SUCCESS_REDIRECT_URL
-            elif self.auth_type == "signin"
+            elif self.auth_type == "signin":
                 redirect = settings.SLACK_SIGNIN_SUCCESS_REDIRECT_URL
         return HttpResponseRedirect(redirect)
