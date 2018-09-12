@@ -107,8 +107,8 @@ class SlackAuthView(RedirectView):
 
         params = urlencode({
             'client_id': settings.SLACK_CLIENT_ID,
-            'redirect_uri': self.request.build_absolute_uri(reverse('slack_auth')),
-            'scope': getattr(settings, "ADD_SLACK_SCOPE" if self.auth_type == "add" else "SIGNIN_SLACK_SCOPE"),
+            'redirect_uri': self.request.build_absolute_uri(reverse('slack_add' if self.auth_type == "add" else 'slack_signin')),
+            'scope': getattr(settings, "SLACK_ADD_SCOPE" if self.auth_type == "add" else "SLACK_SIGNIN_SCOPE"),
             'state': state,
         })
 
@@ -119,7 +119,7 @@ class SlackAuthView(RedirectView):
             'client_id': settings.SLACK_CLIENT_ID,
             'client_secret': settings.SLACK_CLIENT_SECRET,
             'code': code,
-            'redirect_uri': self.request.build_absolute_uri(reverse('slack_auth')),
+            'redirect_uri': self.request.build_absolute_uri(reverse('slack_add' if self.auth_type == "add" else 'slack_signin')),
         }
 
         return requests.get(settings.SLACK_OAUTH_ACCESS_URL, params=params)
