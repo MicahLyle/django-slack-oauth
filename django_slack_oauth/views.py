@@ -68,7 +68,7 @@ class SlackAuthView(RedirectView):
         if hasattr(self.request, "user"):
             user = self.request.user
             if hasattr(user, "extra_slack_auth_state"):
-                return user.extra_slack_auth_state
+                return user.extra_slack_auth_state(self.auth_type)
         return ''
 
 
