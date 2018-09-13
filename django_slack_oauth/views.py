@@ -6,6 +6,7 @@ from importlib import import_module
 import requests
 
 import django
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 
 DJANGO_MAJOR_VERSION =  int(django.__version__.split('.')[0])
@@ -65,12 +66,10 @@ class SlackAuthView(RedirectView):
         Should return a comma separated list of characters that represent extra state
         for authentication or an empty string.
         """
-        if hasattr(self.request, "user"):
-            user = self.request.user
-            if hasattr(user, "extra_slack_auth_state"):
-                return user.extra_slack_auth_state(self.auth_type, self.request)
+        user_model = get_user_model()
+        if hasattr(user_model, "extra_slack_auth_state"):
+            return user_model.extra_slack_auth_state(self.auth_type, self.request)
         return ''
-
 
     def get(self, request, *args, **kwargs):
         code = request.GET.get('code')
