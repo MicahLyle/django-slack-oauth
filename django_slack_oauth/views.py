@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import uuid
+import re
 from importlib import import_module
 
 import requests
@@ -126,7 +127,7 @@ class SlackAuthView(RedirectView):
     def validate_state(self, state):
         state_before = cache.get(self.cache_key)
         cache.delete(self.cache_key)
-        if type(state_before) is str and type(state) is str and state_before[:6] == state[:6]:
+        if type(state_before) is str and type(state) is str and state_before[:17] == state[:17]:
             # Add the state before and now to the request so that if we need to do
             # something with that information we can
             self.request.slack_state_before = state_before
@@ -141,9 +142,38 @@ class SlackAuthView(RedirectView):
         # Prepend a space to extra state if it's there
         if extra_state != '':
             extra_state = ' ' + extra_state
-        state = str(uuid.uuid4())[:6] + extra_state
+        state = str(uuid.uuid4())[:17] + extra_state
         cache.set(self.cache_key, state)
         return state
+
+    def check_for_redirect_in_state(self):
+        """
+        If the extra state from the user previously contained a specific
+        string, redirect back into the slack application as specified
+        (by deep linking back into the slack application).
+        """
+        if "slack_state_before" not in self.request:
+            return None
+        extra_state = self.request.slack_state_before.split()[-1].split(",")
+        # redirect slack [open/team/channel/message/file]
+        deep_link_pattern = re.compile(r"^rs[otcmf]")
+        for state_string in extra_state:
+            if deep_link_pattern.match(state_string):
+                deep_link = "slack://"
+                type_char = state_string[2]
+                values = state_string.split(":")
+                if type_char == "o" or type_char == "t":
+                    deep_link += "open"
+                if type_char == "t":
+                    deep_link += "?team=" + values[-1]
+                if type_char == "c":
+                    deep_link += "channel?team=" + values[-2] + "&id=" + values[-1]
+                if type_char == "m":
+                    deep_link += "user?team=" + values[-2] + "&id=" + values[-1]
+                if type_char == "f":
+                    deep_link += "file?team=" + values[-2] + "&id=" + values[-1]
+                return deep_link
+        return None
 
     def error_message(self, msg=text_error):
         messages.add_message(self.request, messages.ERROR, '%s' % msg)
@@ -159,4 +189,5 @@ class SlackAuthView(RedirectView):
                 redirect = settings.SLACK_ADD_SUCCESS_REDIRECT_URL
             elif self.auth_type == "signin":
                 redirect = settings.SLACK_SIGNIN_SUCCESS_REDIRECT_URL
+            redirect = self.check_for_redirect_in_state() or redirect
         return HttpResponseRedirect(redirect)
