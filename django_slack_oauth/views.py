@@ -152,7 +152,7 @@ class SlackAuthView(RedirectView):
         string, redirect back into the slack application as specified
         (by deep linking back into the slack application).
         """
-        if "slack_state_before" not in self.request:
+        if not hasattr(self.request, "slack_state_before"):
             return None
         extra_state = self.request.slack_state_before.split()[-1].split(",")
         # redirect slack [open/team/channel/message/file]
