@@ -190,4 +190,6 @@ class SlackAuthView(RedirectView):
             elif self.auth_type == "signin":
                 redirect = settings.SLACK_SIGNIN_SUCCESS_REDIRECT_URL
             redirect = self.check_for_redirect_in_state() or redirect
+            if redirect:
+                redirect = f"https://slack-redir.net/link?url={redirect}"
         return HttpResponseRedirect(redirect)
