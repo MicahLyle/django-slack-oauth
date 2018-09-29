@@ -160,7 +160,7 @@ class SlackAuthView(RedirectView):
         redirect_to = None
         for state_string in extra_state:
             # redirect to here (rth)
-            if state_string == "rth":
+            if state_string.startswith("rth"):
                 redirect_to = state_string.split(":")[-1]
                 break
             elif deep_link_pattern.match(state_string):
