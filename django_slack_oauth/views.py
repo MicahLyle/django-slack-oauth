@@ -157,8 +157,13 @@ class SlackAuthView(RedirectView):
         extra_state = self.request.slack_state_before.split()[-1].split(",")
         # redirect slack [open/team/channel/message/file]
         deep_link_pattern = re.compile(r"^rs[otcmf]")
+        redirect_to = None
         for state_string in extra_state:
-            if deep_link_pattern.match(state_string):
+            # redirect to here (rth)
+            if state_string == "rth":
+                redirect_to = state_string.split(":")[-1]
+                break
+            elif deep_link_pattern.match(state_string):
                 deep_link = "slack://"
                 type_char = state_string[2]
                 values = state_string.split(":")
@@ -172,8 +177,8 @@ class SlackAuthView(RedirectView):
                     deep_link += "user?team=" + values[-2] + "&id=" + values[-1]
                 if type_char == "f":
                     deep_link += "file?team=" + values[-2] + "&id=" + values[-1]
-                return deep_link
-        return None
+                redirect_to = deep_link
+        return redirect_to
 
     def error_message(self, msg=text_error):
         messages.add_message(self.request, messages.ERROR, '%s' % msg)
