@@ -189,7 +189,12 @@ class SlackAuthView(RedirectView):
                 redirect = settings.SLACK_ADD_SUCCESS_REDIRECT_URL
             elif self.auth_type == "signin":
                 redirect = settings.SLACK_SIGNIN_SUCCESS_REDIRECT_URL
-            redirect = self.check_for_redirect_in_state() or redirect
-            if redirect:
-                redirect = f"https://slack-redir.net/link?url={redirect}"
+            redirect_from_state = self.check_for_redirect_in_state()
+            # Use slack-redir.net to do slack:// redirects (deep linking)
+            # to avoid Django throwing an error because HttpResponseRedirect
+            # can't redirect to slack://...
+            if redirect_from_state and "slack://" in redirect_from_state:
+                redirect = f"https://slack-redir.net/link?url={redirect_from_state}"
+            else:
+                redirect = redirect_from_state or redirect
         return HttpResponseRedirect(redirect)
