@@ -64,8 +64,7 @@ class SlackAuthView(RedirectView):
     @property
     def custom_scope(self):
         """
-        Should return a comma separated list custom scopes requested, or
-        an empty string.
+        Should return a comma separated list custom scopes requested or None.
         """
         user_model = get_user_model()
         if hasattr(user_model, "custom_slack_auth_scope"):
