@@ -157,7 +157,8 @@ class SlackAuthView(RedirectView):
         if extra_state != '':
             extra_state = ' ' + extra_state
         state = str(uuid.uuid4())[:17] + extra_state
-        cache.set(self.cache_key, state)
+        # 30 minute timeout
+        cache.set(self.cache_key, state, 1800)
         return state
 
     def check_for_redirect_in_state(self):
