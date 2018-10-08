@@ -68,8 +68,8 @@ class SlackAuthView(RedirectView):
         an empty string.
         """
         user_model = get_user_model()
-        if hasattr(user_model, "extra_slack_auth_scope"):
-            return user_model.extra_slack_auth_scope(self.auth_type, self.request)
+        if hasattr(user_model, "custom_slack_auth_scope"):
+            return user_model.custom_slack_auth_scope(self.auth_type, self.request)
         return ''
 
     @property
