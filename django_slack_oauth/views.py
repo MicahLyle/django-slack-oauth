@@ -64,7 +64,7 @@ class SlackAuthView(RedirectView):
     @property
     def custom_scope(self):
         """
-        Should return a comma separated list (string) of custom scopes requested
+        Should return a space separated list (string) of custom scopes requested
         for authentication or an empty string.
         """
         user_model = get_user_model()
