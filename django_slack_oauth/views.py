@@ -111,6 +111,8 @@ class SlackAuthView(RedirectView):
         else:
             # Call the next function in the queue
             request, api_data = pipelines.pop(0)(request, api_data)
+            if "redirect_to_here" in api_data:
+                self.redirect_from_pipeline = api_data["redirect_to_here"]
             return self.execute_pipelines(request, api_data, pipelines)
 
     def auth_request(self):
@@ -210,11 +212,12 @@ class SlackAuthView(RedirectView):
             elif self.auth_type == "signin":
                 redirect = settings.SLACK_SIGNIN_SUCCESS_REDIRECT_URL
             redirect_from_state = self.check_for_redirect_in_state()
+            redirect_from_pipeline = getattr(self, "redirect_from_pipeline", None)
             # Use slack-redir.net to do slack:// redirects (deep linking)
             # to avoid Django throwing an error because HttpResponseRedirect
             # can't redirect to slack://...
             if redirect_from_state and "slack://" in redirect_from_state:
                 redirect = f"https://slack-redir.net/link?url={redirect_from_state}"
             else:
-                redirect = redirect_from_state or redirect
+                redirect = redirect_from_state or redirect_from_pipeline or redirect
         return HttpResponseRedirect(redirect)
