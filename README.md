@@ -1,6 +1,6 @@
 <img src="http://i.imgur.com/YF8yAJS.png" width="80">
 
-# Django Slack OAuth
+# Django Slack OAuth [![Build Status](https://travis-ci.org/izdi/django-slack-oauth.svg?branch=master)](https://travis-ci.org/izdi/django-slack-oauth)
 
 A lightweight module for integrating your Django application with Slack.
 
@@ -170,13 +170,4 @@ SLACK_OAUTH_ACCESS_URL = 'https://slack.com/api/oauth.access'
 
 ### Forgery Attacks
 
-To avoid forgery attacks we pass the `state` parameter in the initial authorization request. This state is stored in cache. For production environments, it's highly recommended to avoid using `LocMemCache`, and set up your cache backend using `redis` or `MemcachedCache`. For example:
-
-```python
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
-    }
-}
-```
+To avoid forgery attacks we pass the `state` parameter in the initial authorization request. This state is stored in the session, which requires the [session middleware to be enabled](https://docs.djangoproject.com/en/2.1/topics/http/sessions/#enabling-sessions) (on by default).

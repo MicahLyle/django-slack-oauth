@@ -9,7 +9,6 @@ from .models import SlackOAuthRequest, SlackUser
 __all__ = (
     'log_request',
     'slack_user',
-
     'debug',
 )
 

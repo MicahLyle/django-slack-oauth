@@ -16,7 +16,6 @@ if DJANGO_MAJOR_VERSION < 2:
 else:
     from django.urls import reverse
 
-from django.core.cache import cache
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.views.generic import RedirectView, View
 
@@ -39,7 +38,7 @@ class StateMismatch(Exception):
 
 class DefaultAddSuccessView(View):
     def get(self, request):
-        messages.success(request, "You've been successfully by adding to slack.")
+        messages.success(request, "You've successfully added to slack.")
         return HttpResponse("Slack OAuth login successful with add to slack.")
 
 
@@ -58,7 +57,7 @@ class SlackAuthView(RedirectView):
     auth_type = None
 
     @property
-    def cache_key(self):
+    def session_key(self):
         return 'slack:' + str(self.request.user)
 
     @property
@@ -141,17 +140,15 @@ class SlackAuthView(RedirectView):
         return requests.get(settings.SLACK_OAUTH_ACCESS_URL, params=params)
 
     def validate_state(self, state):
-        state_before = cache.get(self.cache_key)
-        cache.delete(self.cache_key)
-        if type(state_before) is str and type(state) is str and state_before[:17] == state[:17]:
+        state_before = self.request.session.pop(self.session_key)
+        if isinstance(state_before, str) and isinstance(state, str) and state_before[:17] == state[:17]:
             # Add the state before and now to the request so that if we need to do
             # something with that information we can
             self.request.slack_state_before = state_before
             self.request.slack_state_now = state
             return True
         else:
-            raise StateMismatch('State mismatch upon authorization completion.'
-                                ' Try new request.')
+            raise StateMismatch('State mismatch upon authorization completion. Try a new request.')
 
     def store_state(self):
         extra_state = self.extra_state
@@ -159,8 +156,7 @@ class SlackAuthView(RedirectView):
         if extra_state != '':
             extra_state = ' ' + extra_state
         state = str(uuid.uuid4())[:17] + extra_state
-        # 30 minute timeout
-        cache.set(self.cache_key, state, 1800)
+        self.request.session[self.session_key] = state
         return state
 
     def check_for_redirect_in_state(self):
