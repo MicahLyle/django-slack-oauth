@@ -58,7 +58,7 @@ class SlackAuthView(RedirectView):
 
     @property
     def session_key(self):
-        return 'slack:' + str(self.request.user)
+        return 'slack'
 
     @property
     def custom_scope(self):
