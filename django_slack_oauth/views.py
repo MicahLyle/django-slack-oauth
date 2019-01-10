@@ -56,9 +56,10 @@ class SlackAuthView(RedirectView):
     # This gets set by as_view
     auth_type = None
 
-    @property
-    def session_key(self):
-        return 'slack'
+    def session_key(self, uuid4_part):
+        # NOTE, IMPORTANT: Do not change this in production without considering
+        # existing sessions and users with existing sessions, etc.
+        return f'slack:{uuid4_part}'
 
     @property
     def custom_scope(self):
@@ -140,7 +141,9 @@ class SlackAuthView(RedirectView):
         return requests.get(settings.SLACK_OAUTH_ACCESS_URL, params=params)
 
     def validate_state(self, state):
-        state_before = self.request.session.pop(self.session_key)
+        # Explicitly split on the space here, not () for any whitespace.
+        uuid4_part = (state or '').split(' ')[0]
+        state_before = self.request.session.pop(self.session_key(uuid4_part))
         if isinstance(state_before, str) and isinstance(state, str) and state_before[:17] == state[:17]:
             # Add the state before and now to the request so that if we need to do
             # something with that information we can
@@ -152,11 +155,12 @@ class SlackAuthView(RedirectView):
 
     def store_state(self):
         extra_state = self.extra_state
-        # Prepend a space to extra state if it's there
+        # Prepend a space to extra state if it's there.
         if extra_state != '':
             extra_state = ' ' + extra_state
-        state = str(uuid.uuid4())[:17] + extra_state
-        self.request.session[self.session_key] = state
+        uuid4_part = str(uuid.uuid4())[:17]
+        state = uuid4_part + extra_state
+        self.request.session[self.session_key(uuid4_part)] = state
         return state
 
     def check_for_redirect_in_state(self):
