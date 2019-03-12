@@ -31,7 +31,9 @@ default_settings = {
     'SLACK_PIPELINES': [
         'django_slack_oauth.pipelines.log_request',
         'django_slack_oauth.pipelines.slack_user'
-    ]
+    ],
+
+    'SLACK_OAUTH_SESSION_KEY_NOT_FOUND_HANDLER': 'django_slack_oauth.utils.session_key_not_found_handler'
 }
 
 
